@@ -145,17 +145,19 @@ public class Protagonista {
                 return;
             }
         }
-        System.out.println("Inventário cheio. Não é possível adicionar o item: " + item.getNome());
     }
 
-    public void retirarItem(String nomeItem) {
+    public void retirarItem(Item nomeItem) {
+        if (nomeItem == null || inventario == null) {
+            return;
+        }
+
         for (int i = 0; i < inventario.length; i++) {
-            if (inventario[i] != null && inventario[i].getNome().equalsIgnoreCase(nomeItem)) {
+            if (inventario[i] != null && inventario[i].equals(nomeItem)) {
                 inventario[i] = null;
                 return;
             }
         }
-        System.out.println("Item não encontrado no inventário: " + nomeItem);
     }
 
     public void usarItem(String nomeItem) {
@@ -164,17 +166,6 @@ public class Protagonista {
                 inventario[i].usar(this);
                 inventario[i] = null;
                 return;
-            }
-        }
-        System.out.println("Item não encontrado no inventário: " + nomeItem);
-    }
-
-    public void verItems() {
-        System.out.println("Inventário:");
-        for (Item item : inventario) {
-            if (item != null) {
-                System.out.println("- " + item.getNome());
-                System.out.println("  Descrição: " + item.getDescricao());
             }
         }
     }

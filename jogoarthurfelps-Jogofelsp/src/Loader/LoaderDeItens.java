@@ -60,7 +60,7 @@ public class LoaderDeItens{
 
 
         repositorioItens.addItem(
-                "FRAGMENTO BLACKGLASS",
+                "FRAGMENTO_BLACKGLASS",
                 fragmentoBlackglass
         );
 

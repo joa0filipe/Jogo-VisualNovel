@@ -31,7 +31,7 @@ public class EscolhaTest {
         Protagonista p = new Protagonista("Eve", 5,5,5);
         p.adicionarDinheiro(100);
         Item it = new Item("espada", "arma letal");
-
+        p.adicionarItem(it);
         Escolhas esc = new Escolhas("next","Fazer algo","Transição", it, req, 50, 0, 0, null, 0, null, null, furtividade4);
         assertTrue(esc.podeExecutarEscolha(p));
 
@@ -45,9 +45,10 @@ public class EscolhaTest {
 
 
         p.adicionarDinheiro(200);
-        p.adicionarItem(new Item("Key","Chave"));
+        Item item = new Item("Key","Chave");
+        p.adicionarItem(item);
 
-        Escolhas esc = new Escolhas("next","Texto","Tr", new Item("Key","Chave"), null, 50, -20, 30, "dante", 5, "Key", new Item("GoldCoin", "Descrição"), furtividade4);
+        Escolhas esc = new Escolhas("next","Texto","Tr", new Item("Key","Chave"), null, 50, -20, 30, "dante", 5, item, new Item("GoldCoin", "Descrição"), furtividade4);
 
 
         assertTrue(p.possuiItem("Key"));

@@ -21,6 +21,5 @@ public class Item {
        if (protagonista == null) {
            return;
        }
-       System.out.println("Item usado: " + nome + " - " + descricao);
     }
 }

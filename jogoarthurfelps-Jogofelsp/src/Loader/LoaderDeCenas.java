@@ -2668,7 +2668,7 @@ public class LoaderDeCenas {
         
                 A partir dali, %s está sozinho.
                 """, protagonista.getNome(), protagonista.getNome(), protagonista.getNome(), protagonista.getNome() ),
-                chaveImprovisada, null, 0, 0, 0, null, 0, "CHAVE_IMPROVISADA", null, ganhaFurtividade1));
+                chaveImprovisada, null, 0, 0, 0, null, 0, chaveImprovisada, null, ganhaFurtividade1));
         cena06001A.addEscolha(new Escolhas("C07_SOLO_A", "Usar o cartão de acesso roubado.", formatTexto("""
                 %s observa o cartão de acesso.
         
@@ -2700,7 +2700,7 @@ public class LoaderDeCenas {
         
                 Agora precisa encontrar sozinho o caminho para fora.
                 """, protagonista.getNome(), protagonista.getNome(), protagonista.getNome(), protagonista.getNome() ),
-                cartaoAcesso, null, 0, 0, 0, null, 0, "CARTAO_ACESSO", null, ganhaFurtividade1));
+                cartaoAcesso, null, 0, 0, 0, null, 0, cartaoAcesso, null, ganhaFurtividade1));
         cena06001A.addEscolha(new Escolhas("C07_IMPROVISO_A", "Criar um plano de fuga sem depender de ninguém.", formatTexto("""
                 %s olha para o bilhete.
         
@@ -2921,7 +2921,7 @@ public class LoaderDeCenas {
         
                 Dessa vez, não existe parceiro.
                 """, protagonista.getNome(), protagonista.getNome(), protagonista.getNome() ),
-                chaveImprovisada, null, 0, 0, 0, null, 0, "CHAVE_IMPROVISADA", null, ganhaFurtividade1));
+                chaveImprovisada, null, 0, 0, 0, null, 0, chaveImprovisada, null, ganhaFurtividade1));
         cena06001B.addEscolha(new Escolhas("C07_SOLO_B", "Usar o cartão de acesso e fugir sozinho.", formatTexto("""
                 %s passa o dedo pela borda do cartão.
         
@@ -2951,7 +2951,7 @@ public class LoaderDeCenas {
         
                 Por enquanto.
                 """, protagonista.getNome(), protagonista.getNome(), protagonista.getNome() ),
-                cartaoAcesso, null, 0, 0, 0, null, 0, "CARTAO_ACESSO", null, ganhaFurtividade1));
+                cartaoAcesso, null, 0, 0, 0, null, 0, cartaoAcesso, null, ganhaFurtividade1));
         cena06001B.addEscolha(new Escolhas("C07_IMPROVISO_B", "Ignorar todos os planos e criar sua própria fuga.", formatTexto("""
                 %s olha para o bilhete de Dante.
         

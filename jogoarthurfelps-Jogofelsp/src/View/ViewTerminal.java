@@ -153,15 +153,8 @@ public class ViewTerminal {
                     jogando = false;
                     executando = false;
                     Saida();
-
-                } else if (resultado.equals("Protagonista")) {
-                    limparTela();
-                    System.out.println(servicosJogo.getProta());
-                    aguardarEnter();
-                    limparTela();
-                    System.out.print(servicosJogo.cenaToString());
-
-                } else if (resultado.equals("Pausar")) {
+                }
+                 else if (resultado.equals("Pausar")) {
                     pausar();
                     limparTela();
                     System.out.print(servicosJogo.cenaToString());
@@ -187,18 +180,17 @@ public class ViewTerminal {
                 ║  [2] Sair da partida                                                 ║
                 ╚══════════════════════════════════════════════════════════════════════╝
                 """);
-
-        while (true) {
+        boolean pausa = true;
+        while (pausa) {
             int opcao = lerOpcao("Escolha uma opção: ");
 
             switch (opcao) {
                 case 1 -> { return; }
                 case 2 -> {
-                    System.out.println("\nVocê saiu da partida.");
-                    System.exit(0);
-                    return;
+                    pausa = false;
+                    inicio();
                 }
-                default -> System.out.println("Opção de pausa inválida.");
+                default -> System.out.println("Opção inválida.");
             }
         }
     }
@@ -253,9 +245,9 @@ public class ViewTerminal {
             ║                                                                      ║
             ║  Durante uma cena:                                                   ║
             ║                                                                      ║
-            ║     [1], [2], [3]  → realizar uma escolha                            ║
-            ║     [4]            → visualizar seus atributos                       ║
-            ║     [5]            → sair da partida                                 ║
+            ║     [1] - [5]      → realizar uma escolha                            ║
+            ║     [6]            → sair                                            ║
+            ║     [0]            → pausar                                          ║
             ║                                                                      ║
             ╠══════════════════════════════════════════════════════════════════════╣
             ║                    Pressione ENTER para voltar                       ║

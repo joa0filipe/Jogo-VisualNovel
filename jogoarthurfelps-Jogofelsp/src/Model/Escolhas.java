@@ -13,13 +13,13 @@ public class Escolhas {
     private int modificadorDinheiro;
     private String personagemAfinidade;
     private int difAfinidade;
-    private String itemConsumido;
+    private Item itemConsumido;
     private Item itemGanho;
     private Map<String, Integer> atributosAlterados;
 
 
 
-    public Escolhas(String idProximoCap, String texto, String transicaoTexto, Item itemRequerido, Map<String, Integer> atributoRequerido, int custoDinheiro, int danoOuCura, int modificadorDinheiro, String personagemAfinidade, int difAfinidade, String itemConsumido, Item itemGanho, Map<String, Integer> atributosAlterados) {
+    public Escolhas(String idProximoCap, String texto, String transicaoTexto, Item itemRequerido, Map<String, Integer> atributoRequerido, int custoDinheiro, int danoOuCura, int modificadorDinheiro, String personagemAfinidade, int difAfinidade, Item itemConsumido, Item itemGanho, Map<String, Integer> atributosAlterados) {
         this.idProximoCap = idProximoCap;
         this.Texto = texto;
         this.itemRequerido = itemRequerido;

@@ -40,7 +40,6 @@ public class ServicosJogo {
         return prota;
     }
 
-
     public Cena getCena(String id) {
         return repositorio.getCena(id);
     }
@@ -90,15 +89,15 @@ public class ServicosJogo {
 
         hudCena.append("──────────────────────────────────────────────────────────────────────────────\n");
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < cenaAtual.getOpcoes().size(); i++) {
             if (cenaAtual.getEscolha(i) != null) {
                 if(cenaAtual.getEscolha(i).podeExecutarEscolha(prota)) {
                     hudCena.append("[").append(i + 1).append("] ").append(cenaAtual.getEscolha(i).getTexto()).append("\n");
                 }
             }
         }
-        hudCena.append("[4] Sair\n");
-        hudCena.append("[5] Pausar jogo\n");
+        hudCena.append("[6] Sair\n");
+        hudCena.append("[0] Pausar jogo\n");
         hudCena.append("──────────────────────────────────────────────────────────────────────────────\n");
         hudCena.append("> Escolha uma opção: ");
         return hudCena.toString();
@@ -116,43 +115,14 @@ public class ServicosJogo {
         return texto;
     }
 
-    public StringBuilder textoInventario(){
-        StringBuilder inventario = new StringBuilder();
-        inventario.append("""
-        ╔══════════════════════════════════════════════════════════════════════╗
-        ║                           JOGO PAUSADO                               ║
-        ╠══════════════════════════════════════════════════════════════════════╣
-        ║                                                                      ║
-        ║ ► ATRIBUTOS DO PERSONAGEM                                            ║
-        ║   • Saúde: %d HP                                                     ║
-        ║   • Dinheiro: R$ %d                                                  ║
-        ║   • Charme: %d                                                       ║
-        ║   • Astúcia: %d                                                      ║
-        ║   • Furtividade: %d                                                  ║
-        ║                                                                      ║
-          ► ITENS NO INVENTÁRIO
-        """.formatted(prota.getSaude(), prota.getDinheiro(), prota.getCharme(), prota.getAstucia(), prota.getFurtividade()));
-        if(prota.getInventario() == null){
-            inventario.append("Seu inventário vazio...");
-        }else{
-            for(Item item : prota.getInventario()){
-                if(item != null) {
-                    inventario.append("  • ").append(item.getNome()).append("\n");
-                    inventario.append("    └ ").append(item.getDescricao()).append("\n");
-                }
-            }
-        }
-        return  inventario;
-    }
-
     public String processarEscolha(int index){
-        if(index == 4){
+        if(index == 6){
             return "Sair";
         }
-        if (index == 5) {
+        if (index == 0) {
             return "Pausar";
         }
-        if (index < 1 || index > 3) {
+        if (index < 1 || index > 5) {
             return null;
         }
         if (cenaAtual != null){
@@ -173,7 +143,6 @@ public class ServicosJogo {
     }
         return null;
     }
-
 
     public void changeCena(String nextCena){
             if (nextCena == null || nextCena.isBlank()) {

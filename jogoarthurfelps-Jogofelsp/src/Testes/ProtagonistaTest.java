@@ -48,7 +48,7 @@ public class ProtagonistaTest {
         assertFalse(p.possuiItem("Potion"));
         p.adicionarItem(potion);
         assertTrue(p.possuiItem("Potion"));
-        p.usarItem("Potion");
+        p.retirarItem(potion);
         assertFalse(p.possuiItem("Potion"));
     }
 }

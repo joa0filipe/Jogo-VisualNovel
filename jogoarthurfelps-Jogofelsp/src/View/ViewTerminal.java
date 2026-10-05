@@ -178,6 +178,7 @@ public class ViewTerminal {
                 ╠══════════════════════════════════════════════════════════════════════╣
                 ║  [1] Continuar                                                       ║
                 ║  [2] Sair da partida                                                 ║
+                ║  [3] Salvar partida                                                  ║
                 ╚══════════════════════════════════════════════════════════════════════╝
                 """);
         boolean pausa = true;
@@ -189,6 +190,10 @@ public class ViewTerminal {
                 case 2 -> {
                     pausa = false;
                     inicio();
+                }
+                case 3 -> {
+                    servicosJogo.saveManual();
+                    System.out.println("Save Concluído!");
                 }
                 default -> System.out.println("Opção inválida.");
             }

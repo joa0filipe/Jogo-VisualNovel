@@ -4,6 +4,8 @@ import Loader.LoaderDeCenas;
 import Model.Cena;
 import Model.Protagonista;
 import Model.Item;
+import Model.EstadoDeJogo;
+import Repository.JogoRepository;
 import Repository.RepositorioDeCenas;
 import Repository.RepositorioDeItens;
 import Repository.RepositorioDePersonagens;
@@ -15,12 +17,15 @@ public class ServicosJogo {
     private Protagonista prota;
     private RepositorioDeItens repositorioDeItens;
     private RepositorioDePersonagens repositorioDePersonagens;
+    private EstadoDeJogo state;
+    private JogoRepository staterepository;
 
-    public ServicosJogo(RepositorioDeCenas repository,RepositorioDeItens repositorioDeItens, RepositorioDePersonagens repositorioDePersonagens) {
+    public ServicosJogo(RepositorioDeCenas repository, RepositorioDeItens repositorioDeItens, RepositorioDePersonagens repositorioDePersonagens, JogoRepository stateRepository) {
         this.repositorio = repository;
         this.repositorioDeItens = repositorioDeItens;
         this.cenaAtual = null;
         this.repositorioDePersonagens = repositorioDePersonagens;
+        this.staterepository = stateRepository;
     }
 
     public void iniciarNovaPartida(String nomeJogador) {
@@ -34,6 +39,7 @@ public class ServicosJogo {
         loader.createCena();
 
         this.cenaAtual = repositorio.getCena("C01_001");
+        this.state = new EstadoDeJogo(cenaAtual.getId(), prota);
     }
 
     public Protagonista getProta() {
@@ -155,7 +161,11 @@ public class ServicosJogo {
             this.cenaAtual = repositorio.getCena(nextCena);
     }
 
-
+    public void saveManual(){
+        this.state.setCena(cenaAtual.getId());
+        this.state.setProtagonista(prota);
+        staterepository.salvarEstado(state);
+    }
 
 
 

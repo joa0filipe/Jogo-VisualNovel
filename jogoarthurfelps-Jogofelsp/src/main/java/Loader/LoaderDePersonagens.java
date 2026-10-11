@@ -1,5 +1,6 @@
 package Loader;
 
+import Repository.RepositorioDePersonagens;
 import Model.Personagens;
 import Repository.RepositorioDePersonagens;
 
@@ -10,6 +11,8 @@ public class LoaderDePersonagens {
     public LoaderDePersonagens(RepositorioDePersonagens repositorio) {
         this.repositorio = repositorio;
     }
+
+
 
     public void carregarPersonagens() {
 

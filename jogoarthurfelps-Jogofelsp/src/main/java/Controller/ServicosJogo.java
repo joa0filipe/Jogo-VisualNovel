@@ -1,5 +1,6 @@
 package Controller;
 
+import DTOs.EstadoJogoDTO;
 import Loader.LoaderDeCenas;
 import Model.Cena;
 import Model.Protagonista;
@@ -9,6 +10,11 @@ import Repository.JogoRepository;
 import Repository.RepositorioDeCenas;
 import Repository.RepositorioDeItens;
 import Repository.RepositorioDePersonagens;
+import DAO.implementacao.*;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
+
 
 public class ServicosJogo {
 
@@ -18,17 +24,23 @@ public class ServicosJogo {
     private RepositorioDeItens repositorioDeItens;
     private RepositorioDePersonagens repositorioDePersonagens;
     private EstadoDeJogo state;
+    private final EstadoJsonDao estadoDao;
     private JogoRepository staterepository;
+    private final ServicosSave servicosSave;
 
-    public ServicosJogo(RepositorioDeCenas repository, RepositorioDeItens repositorioDeItens, RepositorioDePersonagens repositorioDePersonagens, JogoRepository stateRepository) {
+
+
+    public ServicosJogo(RepositorioDeCenas repository, RepositorioDeItens repositorioDeItens, RepositorioDePersonagens repositorioDePersonagens, JogoRepository stateRepository, EstadoJsonDao estadoDao, ServicosSave servicosSave) {
         this.repositorio = repository;
         this.repositorioDeItens = repositorioDeItens;
+        this.servicosSave = servicosSave;
         this.cenaAtual = null;
         this.repositorioDePersonagens = repositorioDePersonagens;
         this.staterepository = stateRepository;
+        this.estadoDao = estadoDao;
     }
 
-    public void iniciarNovaPartida(String nomeJogador) {
+    public void iniciarNovaPartida(String nomeJogador, int save) throws Exception {
         this.prota = new Protagonista(nomeJogador);
         LoaderDeCenas loader = new LoaderDeCenas(
                 repositorio,
@@ -40,7 +52,30 @@ public class ServicosJogo {
 
         this.cenaAtual = repositorio.getCena("C01_001");
         this.state = new EstadoDeJogo(cenaAtual.getId(), prota);
+        this.state.setDateTime();
+        servicosSave.salvarJogo(save, this.state);
     }
+
+    public void carregarPartida(int slot) throws Exception {
+        this.state = servicosSave.getEstadoSave(slot);
+        this.prota = state.getProtagonista();
+
+        LoaderDeCenas loader = new LoaderDeCenas(
+                repositorio,
+                repositorioDePersonagens,
+                prota,
+                repositorioDeItens
+        );
+        loader.createCena();
+
+        this.cenaAtual = repositorio.getCena(state.getCena());
+        this.state.setDateTime();
+
+    }
+
+
+
+
 
     public Protagonista getProta() {
         return prota;
@@ -161,12 +196,34 @@ public class ServicosJogo {
             this.cenaAtual = repositorio.getCena(nextCena);
     }
 
-    public void saveManual(){
+    public void saveManual(int slot) throws Exception {
         this.state.setCena(cenaAtual.getId());
         this.state.setProtagonista(prota);
-        staterepository.salvarEstado(state);
+        this.state.setDateTime();
+        estadoDao.salvar(slot, state);
     }
 
+    public EstadoDeJogo acessarSave(int slot) throws Exception {
+
+            state = estadoDao.getEstado(slot);
+            return state;
+
+    }
+
+    public EstadoJogoDTO getMetaDadosSave(int slot) throws Exception {
+        return servicosSave.getInfoSave(slot);
+    }
+
+    public void Reescrita(int slot) throws IOException {
+        servicosSave.LimparSlot(slot);
+    }
+    public int continuarPartida() throws Exception {
+        return servicosSave.getPartidaMaisRecente();
+    }
+
+    public boolean temSave(int slot) throws IOException {
+        return servicosSave.temSave(slot);
+    }
 
 
 }

@@ -118,10 +118,10 @@ javac -d out $(find src -name "*.java")
 Execute o jogo:
 
 ```bash
-java -cp out Main
+java -cp out main.Main
 ```
 
-Se estiver usando IntelliJ IDEA ou outra IDE Java, basta abrir a pasta `jogoarthurfelps-Jogofelsp` como projeto e rodar a classe `Main`.
+Se estiver usando IntelliJ IDEA ou outra IDE Java, basta abrir a pasta `jogoarthurfelps-Jogofelsp` como projeto e rodar a classe `main.Main`.
 
 ## Requisitos
 

@@ -1,0 +1,22 @@
+{
+  "cena": "C01_001",
+  "protagonista": {
+    "nome": "darlan",
+    "danteLealdade": 0,
+    "julianLealdade": 0,
+    "millerLealdade": 0,
+    "charme": 2,
+    "astucia": 2,
+    "furtividade": 2,
+    "saude": 100,
+    "dinheiro": 150,
+    "inventario": [
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "DateTime": "11/10/2026 17:09"
+}

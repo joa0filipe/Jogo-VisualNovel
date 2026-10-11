@@ -1,7 +1,6 @@
 package Model;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class Cena {
     private String id;
@@ -41,12 +40,15 @@ public class Cena {
     public List<Personagens> getPersonagens() {
         return personagens;
     }
+
     public String getNome_cena() {
         return nome_cena;
     }
+
     public int getCapitulo () {
         return capitulo;
     }
+
     public boolean isFinal() {
         return isFinal;
     }
@@ -64,7 +66,7 @@ public class Cena {
     }
 
 
-    //Esse index vem do Controller , que recebe da view a entrada do usuario , ai retorna a escolha e o controller pega o next ID
+    //Esse index vem do main.Controller , que recebe da view a entrada do usuario , ai retorna a escolha e o controller pega o next ID
     public Escolhas getEscolha(int index) {
         if (index >= 0 && index < opcoes.size()) {
             return opcoes.get(index);

@@ -2,6 +2,7 @@ package Repository;
 
 import Model.Cena;
 
+import java.util.Collection;
 import java.util.HashMap;
 
 public class RepositorioDeCenas {
@@ -21,6 +22,11 @@ public class RepositorioDeCenas {
 
     public HashMap<String, Cena> getRepositorioCenas() {
         return repositorioCenas;
+    }
+
+    public Collection<Cena> getTodasCenas() {
+
+        return repositorioCenas.values();
     }
 
 

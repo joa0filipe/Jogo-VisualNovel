@@ -68,7 +68,7 @@ public class ViewTerminal {
 
     public void inicio() throws Exception {
 
-
+        servicosJogo.CarregarPreferencias();
         boolean executando = true;
 
         boolean noMenu = true;
@@ -137,8 +137,7 @@ public class ViewTerminal {
                     inicio();
                 }
                 case 3 -> {
-                    int save = lerOpcao("Escolha um save > ");
-                    servicosJogo.saveManual(save);
+                    servicosJogo.saveManual();
                     System.out.println("Save Concluído!");
                     //System.out.print(servicosJogo.acessarSave(save).toString());
                 }

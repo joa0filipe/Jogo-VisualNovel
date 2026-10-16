@@ -1,6 +1,5 @@
 package Controller;
 
-import DTOs.CenaDTO;
 import DTOs.EstadoJogoDTO;
 import Loader.LoaderDeCenas;
 import Model.Cena;
@@ -14,7 +13,6 @@ import Repository.RepositorioDePersonagens;
 import DAO.implementacao.*;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 
 
 public class ServicosJogo {
@@ -28,7 +26,7 @@ public class ServicosJogo {
     private final EstadoJsonDao estadoDao;
     private JogoRepository staterepository;
     private final ServicosSave servicosSave;
-
+    private int slot;
 
 
     public ServicosJogo(RepositorioDeCenas repository, RepositorioDeItens repositorioDeItens, RepositorioDePersonagens repositorioDePersonagens, JogoRepository stateRepository, EstadoJsonDao estadoDao, ServicosSave servicosSave) {
@@ -55,6 +53,7 @@ public class ServicosJogo {
         this.state = new EstadoDeJogo(cenaAtual.getId(), prota);
         this.state.setDateTime();
         servicosSave.salvarJogo(save, this.state);
+        this.slot= save;
     }
 
     public void carregarPartida(int slot) throws Exception {
@@ -71,7 +70,7 @@ public class ServicosJogo {
 
         this.cenaAtual = repositorio.getCena(state.getCena());
         this.state.setDateTime();
-
+        this.slot = slot;
     }
 
 
@@ -186,22 +185,24 @@ public class ServicosJogo {
         return null;
     }
 
-    public void changeCena(String nextCena){
+    public void changeCena(String nextCena) throws Exception {
             if (nextCena == null || nextCena.isBlank()) {
                 if (this.cenaAtual == null) {
                     this.cenaAtual = repositorio.getCena("C01_001");
                 }
                 return;
             }
-
-            this.cenaAtual = repositorio.getCena(nextCena);
+        if(servicosSave.isAutosave()){
+            saveManual();
+        }
+        this.cenaAtual = repositorio.getCena(nextCena);
     }
 
-    public void saveManual(int slot) throws Exception {
+    public void saveManual() throws Exception {
         this.state.setCena(cenaAtual.getId());
         this.state.setProtagonista(prota);
         this.state.setDateTime();
-        estadoDao.salvar(slot, state);
+        estadoDao.salvar(this.slot, state);
     }
 
     public EstadoDeJogo acessarSave(int slot) throws Exception {
@@ -225,6 +226,11 @@ public class ServicosJogo {
     public boolean temSave(int slot) throws IOException {
         return servicosSave.temSave(slot);
     }
+    public void CarregarPreferencias() throws Exception {
+        servicosSave.CarregarPreferencias();
+    }
+
+
 
 
 

@@ -1,0 +1,25 @@
+{
+  "cena": "C03_001B",
+  "protagonista": {
+    "nome": "jair",
+    "danteLealdade": 7,
+    "julianLealdade": 0,
+    "millerLealdade": 0,
+    "charme": 2,
+    "astucia": 2,
+    "furtividade": 3,
+    "saude": 100,
+    "dinheiro": 150,
+    "inventario": [
+      {
+        "nome": "Sinal de Dante",
+        "descricao": "Representa a lealdade demonstrada ao proteger Dante durante o interrogatório. Essa decisão pode fazer Dante confiar mais no protagonista posteriormente."
+      },
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "DateTime": "15/10/2026 19:14"
+}

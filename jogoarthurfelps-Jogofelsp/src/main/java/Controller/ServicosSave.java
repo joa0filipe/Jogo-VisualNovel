@@ -6,16 +6,25 @@ import DTOs.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ServicosSave {
 
     private final EstadoJsonDao dao;
+    private final PreferenciaJsonDao preferenciaDAO;
+    private boolean autosave;
 
 
-    public ServicosSave(EstadoJsonDao dao) {
+    public ServicosSave(EstadoJsonDao dao, PreferenciaJsonDao preferenciaDAO) throws Exception {
         this.dao = dao;
+        this.preferenciaDAO = preferenciaDAO;
+        this.autosave = preferenciaDAO.carregarPreferencias().get(0).isAtivo();
     }
 
+    public boolean isAutosave() {
+        return autosave;
+    }
 
     public EstadoJogoDTO getInfoSave(int slot) throws Exception{
         if (!dao.temSave(slot)) {
@@ -71,5 +80,24 @@ public class ServicosSave {
         dao.salvar(slot,state);
     }
 
+    public void CarregarPreferencias() throws Exception {
+        List<Preferencia> preferencias = preferenciaDAO.carregarPreferencias();
+
+    }
+
+    public List<PreferenciaDTO> getPreferenciasDTO() throws Exception {
+
+        List<PreferenciaDTO> PreferenciaDTOS = new ArrayList<>();
+        List<Preferencia> preferencias = preferenciaDAO.carregarPreferencias();
+        for (Preferencia p : preferencias) {
+            PreferenciaDTOS.add(new PreferenciaDTO(
+                    p.getTitulo(),
+                    p.getDescricao(),
+                    p.isAtivo()
+            ));
+        }
+
+        return PreferenciaDTOS;
+    }
 
 }

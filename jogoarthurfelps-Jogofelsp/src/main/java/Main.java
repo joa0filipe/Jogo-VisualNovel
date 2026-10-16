@@ -20,14 +20,15 @@ Main {
 
     //dao
     EstadoJsonDao EstadoDao = new EstadoJsonDao();
-
+    PreferenciaJsonDao PreferenciaDao = new PreferenciaJsonDao();
 
     loaderPersonagens.carregarPersonagens();
 
     LoaderDeItens loaderItens = new LoaderDeItens(repositorioItens);
     loaderItens.carregarItens();
 
-    ServicosSave servicosSave = new ServicosSave(EstadoDao);
+
+    ServicosSave servicosSave = new ServicosSave(EstadoDao,PreferenciaDao);
 
     ServicosJogo servicosJogo = new ServicosJogo(
             repositorioCenas,

@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import Repository.RepositorioDeCenas;
 
 public class ServicosSave {
 
@@ -26,23 +27,52 @@ public class ServicosSave {
         return autosave;
     }
 
-    public EstadoJogoDTO getInfoSave(int slot) throws Exception{
+    public EstadoJogoDTO getInfoSave(int slot, RepositorioDeCenas repositorioDeCenas) throws Exception{
         if (!dao.temSave(slot)) {
             return null;
         }
-        if (dao.getEstado(slot) == null){
+        return getInfoSave(dao.getEstado(slot), repositorioDeCenas);
+    }
+
+    public EstadoJogoDTO getInfoSave(EstadoDeJogo estado, RepositorioDeCenas repositorioDeCenas) {
+        if (estado == null || estado.getProtagonista() == null){
             return null;
         }
 
-        EstadoDeJogo estado = dao.getEstado(slot);
-        return new EstadoJogoDTO(
-                estado.getProtagonista().getNome(),
-                estado.getCena(),
-                estado.getCena(),
-                estado.getDateTime()
+        var protagonista = estado.getProtagonista();
+        var cena = repositorioDeCenas.getCena(estado.getCena());
+        String capitulo = cena == null ? "Desconhecido" : "Capítulo " + cena.getCapitulo();
+        String nomeCena = cena == null ? estado.getCena() : cena.getNome_cena();
+        Model.Item[] inventario = protagonista.getInventario();
+        int itens = 0;
+        if (inventario != null) {
+            for (Model.Item item : inventario) {
+                if (item != null) {
+                    itens++;
+                }
+            }
+        }
+        String resumo = String.format(
+                "Vida %d/100 | Dinheiro %d | Astúcia %d | Charme %d | Furtividade %d | "
+                        + "Afinidades (Dante %d, Julian %d, Miller %d) | Itens %d/%d",
+                protagonista.getSaude(),
+                protagonista.getDinheiro(),
+                protagonista.getAstucia(),
+                protagonista.getCharme(),
+                protagonista.getFurtividade(),
+                protagonista.getDanteLealdade(),
+                protagonista.getJulianLealdade(),
+                protagonista.getMillerLealdade(),
+                itens,
+                inventario == null ? 0 : inventario.length
         );
-
-
+        return new EstadoJogoDTO(
+                protagonista.getNome(),
+                capitulo,
+                nomeCena,
+                estado.getDateTime(),
+                resumo
+        );
     }
 
     public void LimparSlot(int slot) throws IOException {

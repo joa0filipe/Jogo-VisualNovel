@@ -10,9 +10,9 @@ public interface estadoDAO {
 
 
 
-    EstadoDeJogo getEstado(int slot) throws Exception;
+    EstadoDeJogo getEstado(int slot) throws IOException;
 
-    void salvar(int slot, EstadoDeJogo state) throws Exception;
+    void salvar(int slot, EstadoDeJogo state) throws IOException;
 
     void limpar(int slot) throws IOException;
 

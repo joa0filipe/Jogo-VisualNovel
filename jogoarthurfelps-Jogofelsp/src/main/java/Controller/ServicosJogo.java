@@ -13,6 +13,8 @@ import Repository.RepositorioDePersonagens;
 import DAO.implementacao.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class ServicosJogo {
@@ -26,10 +28,17 @@ public class ServicosJogo {
     private final EstadoJsonDao estadoDao;
     private JogoRepository staterepository;
     private final ServicosSave servicosSave;
+    private final ServicosConquistas servicosConquistas;
+    private List<DTOs.ConquistaDTO> conquistasRecentes = List.of();
     private int slot;
 
 
     public ServicosJogo(RepositorioDeCenas repository, RepositorioDeItens repositorioDeItens, RepositorioDePersonagens repositorioDePersonagens, JogoRepository stateRepository, EstadoJsonDao estadoDao, ServicosSave servicosSave) {
+        this(repository, repositorioDeItens, repositorioDePersonagens, stateRepository, estadoDao,
+                servicosSave, new ServicosConquistas(new ConquistasJsonDao()));
+    }
+
+    public ServicosJogo(RepositorioDeCenas repository, RepositorioDeItens repositorioDeItens, RepositorioDePersonagens repositorioDePersonagens, JogoRepository stateRepository, EstadoJsonDao estadoDao, ServicosSave servicosSave, ServicosConquistas servicosConquistas) {
         this.repositorio = repository;
         this.repositorioDeItens = repositorioDeItens;
         this.servicosSave = servicosSave;
@@ -37,6 +46,7 @@ public class ServicosJogo {
         this.repositorioDePersonagens = repositorioDePersonagens;
         this.staterepository = stateRepository;
         this.estadoDao = estadoDao;
+        this.servicosConquistas = servicosConquistas;
     }
 
     public void iniciarNovaPartida(String nomeJogador, int save) throws Exception {
@@ -156,7 +166,7 @@ public class ServicosJogo {
         return texto;
     }
 
-    public String processarEscolha(int index){
+    public String processarEscolha(int index) throws IOException {
         if(index == 6){
             return "Sair";
         }
@@ -166,36 +176,70 @@ public class ServicosJogo {
         if (index < 1 || index > 5) {
             return null;
         }
-        if (cenaAtual != null){
-            if(cenaAtual.getEscolha(index-1) != null) {
-
-             if (cenaAtual.getEscolha(index - 1).podeExecutarEscolha(prota)) {
-                cenaAtual.getEscolha(index -1).aplicarEfeitos(prota);
-                 }
-                else {
-                    return null;
-                }
-        }else {
+        if (cenaAtual == null) {
             return null;
         }
 
-       return cenaAtual.getEscolha(index - 1).getIdProximoCap();
+        var escolha = cenaAtual.getEscolha(index - 1);
+        if (escolha == null || !escolha.podeExecutarEscolha(prota)) {
+            return null;
+        }
 
-    }
-        return null;
+        String proximaCena = escolha.getIdProximoCap();
+        if (proximaCena == null || proximaCena.isBlank()) {
+            return null;
+        }
+        if (repositorio.getCena(proximaCena) == null) {
+            throw new IllegalStateException(
+                    "A escolha \"" + escolha.getTexto()
+                            + "\" aponta para uma cena inexistente: " + proximaCena);
+        }
+
+        escolha.aplicarEfeitos(prota);
+        conquistasRecentes = servicosConquistas.registrarEvento("ESCOLHA_REALIZADA");
+        return proximaCena;
     }
 
     public void changeCena(String nextCena) throws Exception {
-            if (nextCena == null || nextCena.isBlank()) {
-                if (this.cenaAtual == null) {
-                    this.cenaAtual = repositorio.getCena("C01_001");
-                }
-                return;
-            }
-        if(servicosSave.isAutosave()){
+        if (nextCena == null || nextCena.isBlank()) {
+            throw new IllegalArgumentException("O ID da próxima cena não pode ser vazio.");
+        }
+
+        Cena proximaCena = repositorio.getCena(nextCena);
+        if (proximaCena == null) {
+            throw new IllegalArgumentException("Cena de destino não encontrada: " + nextCena);
+        }
+
+        this.cenaAtual = proximaCena;
+        if (state != null) {
+            state.setCena(this.cenaAtual.getId());
+            state.setProtagonista(prota);
+        }
+        if (servicosSave.isAutosave()) {
             saveManual();
         }
-        this.cenaAtual = repositorio.getCena(nextCena);
+
+        List<DTOs.ConquistaDTO> novasConquistas = new ArrayList<>(
+                servicosConquistas.registrarEvento("CENA:" + this.cenaAtual.getId()));
+        if (this.cenaAtual.isFinal()) {
+            novasConquistas.addAll(servicosConquistas.registrarEvento(
+                    "FINAL:" + this.cenaAtual.getId()));
+        }
+        conquistasRecentes = List.copyOf(novasConquistas);
+    }
+
+    public List<DTOs.ConquistaDTO> getConquistasDesbloqueadas() throws IOException {
+        return servicosConquistas.getConquistasDesbloqueadas();
+    }
+
+    public List<DTOs.ConquistaDTO> getGaleriaFinais() throws IOException {
+        return servicosConquistas.getGaleriaFinais();
+    }
+
+    public List<DTOs.ConquistaDTO> consumirConquistasRecentes() {
+        List<DTOs.ConquistaDTO> recentes = conquistasRecentes;
+        conquistasRecentes = List.of();
+        return recentes;
     }
 
     public void saveManual() throws Exception {
@@ -213,7 +257,20 @@ public class ServicosJogo {
     }
 
     public EstadoJogoDTO getMetaDadosSave(int slot) throws Exception {
-        return servicosSave.getInfoSave(slot);
+        if (!servicosSave.temSave(slot)) {
+            return null;
+        }
+        EstadoDeJogo estadoSalvo = servicosSave.getEstadoSave(slot);
+        if (repositorio.getCena(estadoSalvo.getCena()) == null) {
+            LoaderDeCenas loader = new LoaderDeCenas(
+                    repositorio,
+                    repositorioDePersonagens,
+                    estadoSalvo.getProtagonista(),
+                    repositorioDeItens
+            );
+            loader.createCena();
+        }
+        return servicosSave.getInfoSave(estadoSalvo, repositorio);
     }
 
     public void Reescrita(int slot) throws IOException {

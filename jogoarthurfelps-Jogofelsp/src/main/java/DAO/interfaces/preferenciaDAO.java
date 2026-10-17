@@ -12,9 +12,9 @@ public interface preferenciaDAO {
 
     void setPreferencia(int id) throws Exception;
 
-    void buscarPreferencia(int id) throws Exception;
-
     void salvarPreferencia(List<Preferencia> preferencias)throws Exception;
+
+    void clear(int id) throws Exception;
 
     void novaPreferencia(Preferencia preferencias)throws Exception;
 

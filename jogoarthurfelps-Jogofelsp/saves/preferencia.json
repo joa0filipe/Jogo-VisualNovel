@@ -3,6 +3,18 @@
     "titulo": "Autosave",
     "id": "0",
     "descricao": "Salvar jogo automaticamente",
+    "ativo": false
+  },
+  {
+    "titulo": "Visualização de escolhas",
+    "id": "1",
+    "descricao": "Permite visualizar todas as escolhas que poderiam ser feitas",
+    "ativo": true
+  },
+  {
+    "titulo": "Titulo",
+    "id": "2",
+    "descricao": "descrição",
     "ativo": true
   }
 ]

@@ -32,11 +32,7 @@ public class Preferencia {
         this.ativo = ativo;
     }
 
-    public static List<Preferencia> criarPreferenciasPadrao() {
-
-        List<Preferencia> preferencias = new ArrayList<>();
-        preferencias.add(new Preferencia("Autosave", "0","Salvar jogo automaticamente", true));
-        return preferencias;
+    public String getId() {
+        return id;
     }
-
 }

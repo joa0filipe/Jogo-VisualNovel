@@ -1,6 +1,7 @@
 package DAO.implementacao;
 
 import DAO.interfaces.preferenciaDAO;
+import Model.Configuracoes;
 import Model.Preferencia;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -35,7 +36,7 @@ public class PreferenciaJsonDao implements preferenciaDAO {
     }
 
     @Override
-    public void buscarPreferencia(int id) throws Exception {
+    public void clear(int id) throws Exception {
 
     }
 
@@ -52,7 +53,7 @@ public class PreferenciaJsonDao implements preferenciaDAO {
     @Override
     public List<Preferencia> carregarPreferencias() throws Exception {
         if (Files.notExists(arquivo) || Files.size(arquivo) == 0) {
-            List<Preferencia> preferencias = Preferencia.criarPreferenciasPadrao();
+            List<Preferencia> preferencias = Configuracoes.criarPreferenciasPadrao();
             salvarPreferencia(preferencias);
             return preferencias;
         }

@@ -1,8 +1,8 @@
 import Controller.ServicosJogo;
+import Controller.ServicosPreferencias;
 import Controller.ServicosSave;
 import Loader.LoaderDeItens;
 import Loader.LoaderDePersonagens;
-import Repository.JogoRepository;
 import Repository.RepositorioDeCenas;
 import Repository.RepositorioDeItens;
 import Repository.RepositorioDePersonagens;
@@ -12,7 +12,7 @@ public class
 Main {
   public static void main(String[] args) throws Exception {
 
-    JogoRepository stateRepository = new JogoRepository(); //tirar
+
     RepositorioDeCenas repositorioCenas = new RepositorioDeCenas();
     RepositorioDePersonagens repositorioPersonagens = new RepositorioDePersonagens();
     RepositorioDeItens repositorioItens = new RepositorioDeItens();
@@ -27,16 +27,17 @@ Main {
     LoaderDeItens loaderItens = new LoaderDeItens(repositorioItens);
     loaderItens.carregarItens();
 
-
-    ServicosSave servicosSave = new ServicosSave(EstadoDao,PreferenciaDao);
+    ServicosPreferencias servicosPreferencias = new ServicosPreferencias(PreferenciaDao);
+    servicosPreferencias.inicializarPreferencias();
+    ServicosSave servicosSave = new ServicosSave(EstadoDao);
 
     ServicosJogo servicosJogo = new ServicosJogo(
             repositorioCenas,
             repositorioItens,
             repositorioPersonagens,
-            stateRepository,
             EstadoDao,
-            servicosSave
+            servicosSave,
+            servicosPreferencias
     );
 
     ViewTerminal view = new ViewTerminal(servicosJogo);

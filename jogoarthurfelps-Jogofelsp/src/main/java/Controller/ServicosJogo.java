@@ -1,18 +1,20 @@
 package Controller;
 
 import DTOs.EstadoJogoDTO;
+import DTOs.PreferenciaDTO;
 import Loader.LoaderDeCenas;
 import Model.Cena;
 import Model.Protagonista;
 import Model.Item;
 import Model.EstadoDeJogo;
-import Repository.JogoRepository;
 import Repository.RepositorioDeCenas;
 import Repository.RepositorioDeItens;
 import Repository.RepositorioDePersonagens;
 import DAO.implementacao.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class ServicosJogo {
@@ -24,18 +26,18 @@ public class ServicosJogo {
     private RepositorioDePersonagens repositorioDePersonagens;
     private EstadoDeJogo state;
     private final EstadoJsonDao estadoDao;
-    private JogoRepository staterepository;
     private final ServicosSave servicosSave;
+    private final ServicosPreferencias servicosPreferencias;
     private int slot;
 
 
-    public ServicosJogo(RepositorioDeCenas repository, RepositorioDeItens repositorioDeItens, RepositorioDePersonagens repositorioDePersonagens, JogoRepository stateRepository, EstadoJsonDao estadoDao, ServicosSave servicosSave) {
+    public ServicosJogo(RepositorioDeCenas repository, RepositorioDeItens repositorioDeItens, RepositorioDePersonagens repositorioDePersonagens, EstadoJsonDao estadoDao, ServicosSave servicosSave, ServicosPreferencias servicosPreferencias) {
         this.repositorio = repository;
         this.repositorioDeItens = repositorioDeItens;
         this.servicosSave = servicosSave;
+        this.servicosPreferencias = servicosPreferencias;
         this.cenaAtual = null;
         this.repositorioDePersonagens = repositorioDePersonagens;
-        this.staterepository = stateRepository;
         this.estadoDao = estadoDao;
     }
 
@@ -73,10 +75,6 @@ public class ServicosJogo {
         this.slot = slot;
     }
 
-
-
-
-
     public Protagonista getProta() {
         return prota;
     }
@@ -93,7 +91,7 @@ public class ServicosJogo {
         return cenaAtual;
     }
 
-    public String cenaToString() {
+    public String cenaToString() throws Exception {
         if (cenaAtual == null) {
             return "Cena não encontrada.\n";
         }
@@ -129,12 +127,18 @@ public class ServicosJogo {
         }
 
         hudCena.append("──────────────────────────────────────────────────────────────────────────────\n");
-
         for (int i = 0; i < cenaAtual.getOpcoes().size(); i++) {
             if (cenaAtual.getEscolha(i) != null) {
-                if(cenaAtual.getEscolha(i).podeExecutarEscolha(prota)) {
-                    hudCena.append("[").append(i + 1).append("] ").append(cenaAtual.getEscolha(i).getTexto()).append("\n");
+
+                if(!servicosPreferencias.isMostrarEscolhas()) {
+                    if (cenaAtual.getEscolha(i).podeExecutarEscolha(prota)) {
+                        hudCena.append("[").append(i + 1).append("] ").append(cenaAtual.getEscolha(i).getTexto()).append("\n");
+                    }
                 }
+                else{
+                        String podeExecutar = cenaAtual.getEscolha(i).podeExecutarEscolha(prota) ? "" : " - [Requisitos não atendidos]";
+                        hudCena.append("[").append(i + 1).append("] ").append(cenaAtual.getEscolha(i).getTexto()).append(podeExecutar).append("\n");
+                    }
             }
         }
         hudCena.append("[6] Sair\n");
@@ -192,7 +196,7 @@ public class ServicosJogo {
                 }
                 return;
             }
-        if(servicosSave.isAutosave()){
+        if(servicosPreferencias.isAutoSave()){
             saveManual();
         }
         this.cenaAtual = repositorio.getCena(nextCena);
@@ -227,11 +231,16 @@ public class ServicosJogo {
         return servicosSave.temSave(slot);
     }
     public void CarregarPreferencias() throws Exception {
-        servicosSave.CarregarPreferencias();
+        servicosPreferencias.CarregarPreferencias();
     }
-
-
-
+    public List<PreferenciaDTO> getInfoPreferencias() throws Exception {
+        List<PreferenciaDTO> Configs = new ArrayList<>();
+        Configs = servicosPreferencias.getPreferenciasDTO();
+        return Configs;
+    }
+    public void alterarPreferencia(int id) throws Exception {
+        servicosPreferencias.inverterPreferencia(id);
+    }
 
 
 }

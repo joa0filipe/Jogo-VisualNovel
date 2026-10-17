@@ -1,9 +1,11 @@
 package View;
 
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Scanner;
 import Controller.ServicosJogo;
 import DTOs.EstadoJogoDTO;
+import DTOs.PreferenciaDTO;
 
 public class ViewTerminal {
     private static final Scanner scanner = new Scanner(System.in);
@@ -68,7 +70,7 @@ public class ViewTerminal {
 
     public void inicio() throws Exception {
 
-        servicosJogo.CarregarPreferencias();
+
         boolean executando = true;
 
         boolean noMenu = true;
@@ -88,7 +90,9 @@ public class ViewTerminal {
                 ║                                                    ║
                 ║                    [3] CRÉDITOS                    ║
                 ║                                                    ║
-                ║                    [4] SAIR                        ║
+                ║                    [4] CONFIGURAÇÕES               ║
+                ║                                                    ║
+                ║                    [5] SAIR                        ║
                 """);
 
             int opcao = lerOpcao("\n> Opção: ");
@@ -100,8 +104,8 @@ public class ViewTerminal {
                 case 2 -> mostrarInstrucoes();
 
                 case 3 -> mostrarCreditos();
-
-                case 4 -> {
+                case 4 -> menuPreferencias();
+                case 5 -> {
                     Saida();
                     noMenu = false;
                 }
@@ -412,6 +416,61 @@ public class ViewTerminal {
         }
     }
 
+    public void menuPreferencias() throws Exception {
 
+        boolean executando = true;
+
+        while (executando) {
+
+            List<PreferenciaDTO> preferencias =
+                    servicosJogo.getInfoPreferencias();
+
+            System.out.println("""
+
+                ════════════════════════════════════════
+                       CONFIGURAÇÕES DO JOGO
+                ════════════════════════════════════════
+                """);
+
+            for (int i = 0; i < preferencias.size(); i++) {
+
+                PreferenciaDTO p = preferencias.get(i);
+
+                String estado = p.ligado() ? "Ligado" : "Desligado";
+
+                System.out.printf("[%d] %s [%s]%n",
+                        i + 1,
+                        p.titulo(),
+                        estado);
+
+                System.out.println("    -" + p.descricao());
+                System.out.println();
+            }
+
+            System.out.println("────────────────────────────────────────");
+            System.out.println("[0] Voltar");
+            System.out.println("────────────────────────────────────────");
+            System.out.print("Deseja alterar alguma opção? Qual? ");
+
+            int opcao;
+
+            try {
+                opcao = Integer.parseInt(scanner.nextLine());
+            } catch (NumberFormatException e) {
+                System.out.println("Opção inválida!");
+                continue;
+            }
+
+            if (opcao == 0) {
+                executando = false;
+
+            } else if (opcao >= 1 && opcao <= preferencias.size()) {
+               servicosJogo.alterarPreferencia(opcao - 1);
+
+            } else {
+                System.out.println("Opção inválida!");
+            }
+        }
+    }
 
 }

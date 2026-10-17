@@ -48,8 +48,8 @@ Em resumo, o jogo já funciona como um protótipo jogável de visual novel textu
 
 ## Ferramentas e tecnologias utilizadas
 
-- **Java**: linguagem principal do jogo;
-- **Java JDK 17 ou superior**: compilação e execução;
+- **Java 25 (JDK)**: compilação e execução;
+- **Maven**: gerenciamento de dependências e build;
 - **IntelliJ IDEA**: organização do projeto, edição e execução durante o desenvolvimento;
 - **JUnit**: criação de testes para classes como protagonista, cenas e escolhas;
 - **Git**: controle de versão do código;
@@ -109,23 +109,20 @@ A partir da raiz do repositório, abra a pasta do projeto Java:
 cd jogoarthurfelps-Jogofelsp
 ```
 
-Compile os arquivos Java:
+Compile o projeto e execute os testes (é necessário ter o JDK 25 e o Maven instalados):
 
-```bash
-javac -d out $(find src -name "*.java")
+```powershell
+mvn clean test
 ```
 
-Execute o jogo:
+Para iniciar o jogo pela IDE, abra a pasta `jogoarthurfelps-Jogofelsp` como projeto Maven e execute a classe `Main`, que está no pacote padrão.
 
-```bash
-java -cp out main.Main
-```
-
-Se estiver usando IntelliJ IDEA ou outra IDE Java, basta abrir a pasta `jogoarthurfelps-Jogofelsp` como projeto e rodar a classe `main.Main`.
+Se o projeto estiver aberto na IntelliJ IDEA, configure o SDK do projeto como JDK 25 e recarregue o projeto Maven.
 
 ## Requisitos
 
-- Java JDK 17 ou superior
+- Java JDK 25
+- Maven
 - IDE Java opcional (IntelliJ IDEA, Eclipse, VS Code com suporte Java)
 
 ## Créditos

@@ -2,6 +2,7 @@ package Controller;
 
 import DTOs.EstadoJogoDTO;
 import DTOs.PreferenciaDTO;
+import DTOs.ConquistaDTO;
 import Loader.LoaderDeCenas;
 import Model.Cena;
 import Model.Protagonista;
@@ -11,6 +12,7 @@ import Repository.RepositorioDeCenas;
 import Repository.RepositorioDeItens;
 import Repository.RepositorioDePersonagens;
 import DAO.implementacao.*;
+import Exceptions.CenaNaoEncontradaException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,14 +30,26 @@ public class ServicosJogo {
     private final EstadoJsonDao estadoDao;
     private final ServicosSave servicosSave;
     private final ServicosPreferencias servicosPreferencias;
+    private final ServicosConquistas servicosConquistas;
+    private List<ConquistaDTO> conquistasRecentes = List.of();
     private int slot;
 
 
     public ServicosJogo(RepositorioDeCenas repository, RepositorioDeItens repositorioDeItens, RepositorioDePersonagens repositorioDePersonagens, EstadoJsonDao estadoDao, ServicosSave servicosSave, ServicosPreferencias servicosPreferencias) {
+        this(repository, repositorioDeItens, repositorioDePersonagens, estadoDao,
+                servicosSave, servicosPreferencias,
+                new ServicosConquistas(new ConquistasJsonDao()));
+    }
+
+    public ServicosJogo(RepositorioDeCenas repository, RepositorioDeItens repositorioDeItens,
+                        RepositorioDePersonagens repositorioDePersonagens, EstadoJsonDao estadoDao,
+                        ServicosSave servicosSave, ServicosPreferencias servicosPreferencias,
+                        ServicosConquistas servicosConquistas) {
         this.repositorio = repository;
         this.repositorioDeItens = repositorioDeItens;
         this.servicosSave = servicosSave;
         this.servicosPreferencias = servicosPreferencias;
+        this.servicosConquistas = servicosConquistas;
         this.cenaAtual = null;
         this.repositorioDePersonagens = repositorioDePersonagens;
         this.estadoDao = estadoDao;
@@ -104,7 +118,7 @@ public class ServicosJogo {
         hudCena.append("══════════════════════════════════════════════════════════════════════════════════\n");
         hudCena.append(cenaAtual.getTexto()).append("\n\n");
 
-        if (prota != null) {
+        if (prota != null && !servicosPreferencias.isOcultarHudAtributos()) {
             hudCena.append(" VIDA ")
                    .append(prota.getSaude())
                    .append(" | DINHEIRO R$ ")
@@ -160,7 +174,7 @@ public class ServicosJogo {
         return texto;
     }
 
-    public String processarEscolha(int index){
+    public String processarEscolha(int index) throws IOException {
         if(index == 6){
             return "Sair";
         }
@@ -170,36 +184,63 @@ public class ServicosJogo {
         if (index < 1 || index > 5) {
             return null;
         }
-        if (cenaAtual != null){
-            if(cenaAtual.getEscolha(index-1) != null) {
-
-             if (cenaAtual.getEscolha(index - 1).podeExecutarEscolha(prota)) {
-                cenaAtual.getEscolha(index -1).aplicarEfeitos(prota);
-                 }
-                else {
-                    return null;
-                }
-        }else {
+        if (cenaAtual == null) {
             return null;
         }
 
-       return cenaAtual.getEscolha(index - 1).getIdProximoCap();
+        var escolha = cenaAtual.getEscolha(index - 1);
+        if (escolha == null || !escolha.podeExecutarEscolha(prota)) {
+            return null;
+        }
 
-    }
-        return null;
+        String proximaCena = escolha.getIdProximoCap();
+        if (proximaCena == null || proximaCena.isBlank()) {
+            return null;
+        }
+        if (repositorio.getCena(proximaCena) == null) {
+            throw new CenaNaoEncontradaException(proximaCena, escolha.getTexto());
+        }
+
+        escolha.aplicarEfeitos(prota);
+        conquistasRecentes = servicosConquistas.registrarEvento("ESCOLHA_REALIZADA");
+        return proximaCena;
     }
 
     public void changeCena(String nextCena) throws Exception {
-            if (nextCena == null || nextCena.isBlank()) {
-                if (this.cenaAtual == null) {
-                    this.cenaAtual = repositorio.getCena("C01_001");
-                }
-                return;
-            }
+        if (nextCena == null || nextCena.isBlank()) {
+            throw new CenaNaoEncontradaException(String.valueOf(nextCena));
+        }
+        Cena proximaCena = repositorio.getCena(nextCena);
+        if (proximaCena == null) {
+            throw new CenaNaoEncontradaException(nextCena);
+        }
+
         if(servicosPreferencias.isAutoSave()){
             saveManual();
         }
-        this.cenaAtual = repositorio.getCena(nextCena);
+        this.cenaAtual = proximaCena;
+
+        List<ConquistaDTO> novasConquistas = new ArrayList<>(
+                servicosConquistas.registrarEvento("CENA:" + cenaAtual.getId()));
+        if (cenaAtual.isFinal()) {
+            novasConquistas.addAll(servicosConquistas.registrarEvento(
+                    "FINAL:" + cenaAtual.getId()));
+        }
+        conquistasRecentes = List.copyOf(novasConquistas);
+    }
+
+    public List<ConquistaDTO> getConquistasDesbloqueadas() throws IOException {
+        return servicosConquistas.getConquistasDesbloqueadas();
+    }
+
+    public List<ConquistaDTO> getGaleriaFinais() throws IOException {
+        return servicosConquistas.getGaleriaFinais();
+    }
+
+    public List<ConquistaDTO> consumirConquistasRecentes() {
+        List<ConquistaDTO> recentes = conquistasRecentes;
+        conquistasRecentes = List.of();
+        return recentes;
     }
 
     public void saveManual() throws Exception {

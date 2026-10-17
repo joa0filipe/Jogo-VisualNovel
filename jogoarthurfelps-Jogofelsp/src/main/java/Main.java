@@ -1,4 +1,5 @@
 import Controller.ServicosJogo;
+import Controller.ServicosConquistas;
 import Controller.ServicosPreferencias;
 import Controller.ServicosSave;
 import Loader.LoaderDeItens;
@@ -21,6 +22,7 @@ Main {
     //dao
     EstadoJsonDao EstadoDao = new EstadoJsonDao();
     PreferenciaJsonDao PreferenciaDao = new PreferenciaJsonDao();
+    ConquistasJsonDao conquistasDao = new ConquistasJsonDao();
 
     loaderPersonagens.carregarPersonagens();
 
@@ -30,6 +32,7 @@ Main {
     ServicosPreferencias servicosPreferencias = new ServicosPreferencias(PreferenciaDao);
     servicosPreferencias.inicializarPreferencias();
     ServicosSave servicosSave = new ServicosSave(EstadoDao);
+    ServicosConquistas servicosConquistas = new ServicosConquistas(conquistasDao);
 
     ServicosJogo servicosJogo = new ServicosJogo(
             repositorioCenas,
@@ -37,7 +40,8 @@ Main {
             repositorioPersonagens,
             EstadoDao,
             servicosSave,
-            servicosPreferencias
+            servicosPreferencias,
+            servicosConquistas
     );
 
     ViewTerminal view = new ViewTerminal(servicosJogo);

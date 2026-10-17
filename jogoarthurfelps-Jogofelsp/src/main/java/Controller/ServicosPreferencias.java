@@ -26,19 +26,23 @@ public class ServicosPreferencias {
         }
 
         boolean alterou = false;
-        int i = 0;
-        for(Preferencia config : Configuracoes.criarPreferenciasPadrao()){
-            boolean existe = false;
-            for (Preferencia p : preferencias) {
-                if (p.getId().equals(config.getId())) {
-                    existe = true;
-                    break;
-                }
-            }
-
-            if (!existe) {
-                preferencias.add(config);
+        for (Preferencia padrao : Configuracoes.criarPreferenciasPadrao()) {
+            int indice = encontrarIndice(preferencias, padrao.getId());
+            if (indice < 0) {
+                preferencias.add(padrao);
                 alterou = true;
+            } else {
+                Preferencia existente = preferencias.get(indice);
+                if (!existente.getTitulo().equals(padrao.getTitulo())
+                        || !existente.getDescricao().equals(padrao.getDescricao())) {
+                    preferencias.set(indice, new Preferencia(
+                            padrao.getTitulo(),
+                            padrao.getId(),
+                            padrao.getDescricao(),
+                            existente.isAtivo()
+                    ));
+                    alterou = true;
+                }
             }
         }
 
@@ -71,8 +75,11 @@ public class ServicosPreferencias {
 
     public void inverterPreferencia(int id) throws Exception {
         List<Preferencia> preferencias = dao.carregarPreferencias();
-
-        Preferencia p = preferencias.get(id);
+        int indice = encontrarIndice(preferencias, Integer.toString(id));
+        if (indice < 0) {
+            throw new IllegalArgumentException("Preferência desconhecida: " + id);
+        }
+        Preferencia p = preferencias.get(indice);
 
         p.setAtivo(!p.isAtivo());
 
@@ -84,7 +91,29 @@ public class ServicosPreferencias {
     }
 
     public boolean isMostrarEscolhas() throws Exception{
-        return dao.carregarPreferencias().get(1).isAtivo();
+        return estaAtiva("1");
+    }
+
+    public boolean isOcultarHudAtributos() throws Exception {
+        return estaAtiva("2");
+    }
+
+    private boolean estaAtiva(String id) throws Exception {
+        List<Preferencia> preferencias = dao.carregarPreferencias();
+        int indice = encontrarIndice(preferencias, id);
+        if (indice < 0) {
+            throw new IllegalStateException("Preferência não inicializada: " + id);
+        }
+        return preferencias.get(indice).isAtivo();
+    }
+
+    private int encontrarIndice(List<Preferencia> preferencias, String id) {
+        for (int i = 0; i < preferencias.size(); i++) {
+            if (id.equals(preferencias.get(i).getId())) {
+                return i;
+            }
+        }
+        return -1;
     }
 
 

@@ -1,15 +1,18 @@
 package View;
 
+import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Scanner;
 import Controller.ServicosJogo;
+import DTOs.ConquistaDTO;
 import DTOs.EstadoJogoDTO;
 import DTOs.PreferenciaDTO;
 
 public class ViewTerminal {
     private static final Scanner scanner = new Scanner(System.in);
     private final ServicosJogo servicosJogo;
+    private boolean encerrarAplicacao;
 
 
     public ViewTerminal(ServicosJogo servicosJogo) {
@@ -36,8 +39,8 @@ public class ViewTerminal {
             } catch (NumberFormatException e) {
                 System.out.println("Entrada inválida. Use apenas números.");
             } catch (java.util.NoSuchElementException e) {
-                System.out.println("\nEntrada encerrada. Encerrando o jogo.");
-                System.exit(0);
+                System.out.println("\nEntrada encerrada. Fechando o jogo.");
+                encerrarAplicacao = true;
                 return -1;
             }
         }
@@ -49,8 +52,23 @@ public class ViewTerminal {
         try {
             scanner.nextLine();
         } catch (java.util.NoSuchElementException e) {
-            System.out.println();
+            System.out.println("\nEntrada encerrada. Fechando o jogo.");
+            encerrarAplicacao = true;
         }
+    }
+
+    private int lerSlot(String mensagem) {
+        while (!encerrarAplicacao) {
+            int slot = lerOpcao(mensagem);
+            if (encerrarAplicacao) {
+                return -1;
+            }
+            if (slot >= 1 && slot <= 3) {
+                return slot;
+            }
+            System.out.println("Slot inválido. Escolha um número de 1 a 3.");
+        }
+        return -1;
     }
 
     private void Saida(){
@@ -69,15 +87,7 @@ public class ViewTerminal {
     }
 
     public void inicio() throws Exception {
-
-
-        boolean executando = true;
-
-        boolean noMenu = true;
-
-        while (noMenu) {
-
-
+        while (!encerrarAplicacao) {
 
             System.out.println("""
                 ╔════════════════════════════════════════════════════╗
@@ -92,10 +102,15 @@ public class ViewTerminal {
                 ║                                                    ║
                 ║                    [4] CONFIGURAÇÕES               ║
                 ║                                                    ║
-                ║                    [5] SAIR                        ║
+                ║                    [5] CONQUISTAS                  ║
+                ║                                                    ║
+                ║                    [6] SAIR                        ║
                 """);
 
             int opcao = lerOpcao("\n> Opção: ");
+            if (encerrarAplicacao) {
+                return;
+            }
 
             switch (opcao) {
 
@@ -105,21 +120,20 @@ public class ViewTerminal {
 
                 case 3 -> mostrarCreditos();
                 case 4 -> menuPreferencias();
-                case 5 -> {
-                    Saida();
-                    noMenu = false;
+                case 5 -> mostrarConquistas();
+                case 6 -> {
+                    encerrarAplicacao();
                 }
 
                 default -> {
                     System.out.println("\nOpção inválida.");
-                    pausar();
                 }
             }
         }
     }
 
 
-    public void pausar() throws Exception {
+    public boolean pausar() throws Exception {
         limparTela();
         System.out.println("""
                 ╔══════════════════════════════════════════════════════════════════════╗
@@ -130,16 +144,15 @@ public class ViewTerminal {
                 ║  [3] Salvar partida                                                  ║
                 ╚══════════════════════════════════════════════════════════════════════╝
                 """);
-        boolean pausa = true;
-        while (pausa) {
+        while (!encerrarAplicacao) {
             int opcao = lerOpcao("Escolha uma opção > ");
+            if (encerrarAplicacao) {
+                return false;
+            }
 
             switch (opcao) {
-                case 1 -> { return; }
-                case 2 -> {
-                    pausa = false;
-                    inicio();
-                }
+                case 1 -> { return true; }
+                case 2 -> { return false; }
                 case 3 -> {
                     servicosJogo.saveManual();
                     System.out.println("Save Concluído!");
@@ -148,6 +161,7 @@ public class ViewTerminal {
                 default -> System.out.println("Opção inválida.");
             }
         }
+        return false;
     }
 
     public void mostrarCreditos() {
@@ -213,6 +227,41 @@ public class ViewTerminal {
         aguardarEnter();
     }
 
+    public void mostrarConquistas() throws IOException {
+        limparTela();
+        System.out.println("""
+                ╔══════════════════════════════════════════════════════════════╗
+                ║                     GALERIA DE CONQUISTAS                    ║
+                ╚══════════════════════════════════════════════════════════════╝
+                """);
+
+        List<ConquistaDTO> conquistas = servicosJogo.getConquistasDesbloqueadas();
+        if (conquistas.isEmpty()) {
+            System.out.println("Nenhuma conquista desbloqueada ainda.");
+        } else {
+            for (ConquistaDTO conquista : conquistas) {
+                System.out.printf("%n🏆 %s%n   %s%n", conquista.nome(), conquista.descricao());
+            }
+        }
+
+        List<ConquistaDTO> finais = servicosJogo.getGaleriaFinais();
+        long finaisAlcancados = finais.stream().filter(ConquistaDTO::desbloqueada).count();
+        System.out.printf("%nFINAIS ALCANÇADOS: %d/%d%n", finaisAlcancados, finais.size());
+        for (ConquistaDTO finalJogo : finais) {
+            String estado = finalJogo.desbloqueada() ? "ALCANÇADO" : "NÃO ALCANÇADO";
+            System.out.printf("%n[%s] %s%n   %s%n",
+                    estado, finalJogo.nome(), finalJogo.descricao());
+        }
+        aguardarEnter();
+    }
+
+    private void mostrarNovasConquistas() {
+        for (ConquistaDTO conquista : servicosJogo.consumirConquistasRecentes()) {
+            System.out.printf("%n🏆 Conquista desbloqueada: %s — %s%n",
+                    conquista.nome(), conquista.descricao());
+        }
+    }
+
     public void formatarSlot(int slot) throws Exception {
         EstadoJogoDTO save = servicosJogo.getMetaDadosSave(slot);
 
@@ -253,36 +302,45 @@ public class ViewTerminal {
         for (int slot = 1; slot <= 3; slot++) {
             formatarSlot(slot);
         }
-        boolean noMenu = true;
-
-        while (noMenu) {
+        while (!encerrarAplicacao) {
 
             int opcao = lerOpcao("\n> Opção: ");
+            if (encerrarAplicacao) {
+                return;
+            }
 
             switch (opcao) {
 
                 case 1 -> {
-                    continuarPartida();
+                    if (continuarPartida()) {
+                        return;
+                    }
+                    aguardarEnter();
                 }
 
                 case 2 -> {
-                    System.out.print("Qual Save deseja carregar? ");
-                    int save = lerOpcao("\n> Save: ");
+                    int save = lerSlot("Qual Save deseja carregar? \n> Save: ");
+                    if (encerrarAplicacao) {
+                        return;
+                    }
                     if(!servicosJogo.temSave(save)) {
                         System.out.print("Nenhum jogo encontrado no save "+save);
                         aguardarEnter();
                         limparTela();
-                        menuSaves();
                     }else{
                         carregarSave(save);
+                        return;
                     }
                 }
 
                 case 3 -> {
-                    System.out.print("Em qual Save deseja salvar seu novo jogo?");
-                    int save = lerOpcao("\n> Save: ");
+                    int save = lerSlot("Em qual Save deseja salvar seu novo jogo? \n> Save: ");
+                    if (encerrarAplicacao) {
+                        return;
+                    }
                     if(!servicosJogo.temSave(save)){
                         novoJogo(save);
+                        return;
                     }else{
                         System.out.print("Esse slot já possui um jogo salvo:\n");
                         formatarSlot(save);
@@ -292,6 +350,9 @@ public class ViewTerminal {
                           [0] Voltar  
                           >                                                                     
                         """);
+                        if (encerrarAplicacao) {
+                            return;
+                        }
 
 
                         switch (escolha){
@@ -299,26 +360,26 @@ public class ViewTerminal {
                                 limparTela();
                                 servicosJogo.Reescrita(save);
                                 novoJogo(save);
+                                return;
                             }
                             case 0 -> {
                                 limparTela();
-                                menuSaves();
                             }
                         }
                     }
                 }
                 case 4 ->{
-                    System.out.print("Qual Save deseja excluir? ");
-                    int save = lerOpcao("\n> Save: ");
+                    int save = lerSlot("Qual Save deseja excluir? \n> Save: ");
+                    if (encerrarAplicacao) {
+                        return;
+                    }
                     if(servicosJogo.temSave(save)){
                         servicosJogo.Reescrita(save);
                         System.out.print("Save excluido com sucesso!:\n");
                         aguardarEnter();
-                        menuSaves();
                     }else {
                         System.out.print("Esse slot não possui nenhum jogo salvo:\n");
                         aguardarEnter();
-                        menuSaves();
                     }
                 }
                 case 0 -> {
@@ -327,7 +388,6 @@ public class ViewTerminal {
 
                 default -> {
                     System.out.println("\nOpção inválida.");
-                    pausar();
                 }
             }
         }
@@ -337,7 +397,7 @@ public class ViewTerminal {
     public void jogando() throws Exception {
         boolean jogando = true;
 
-        while (jogando) {
+        while (jogando && !encerrarAplicacao) {
 
             limparTela();
 
@@ -352,9 +412,13 @@ public class ViewTerminal {
 
             boolean executando = true;
 
-            while (executando) {
+            while (executando && !encerrarAplicacao) {
                 int opcao = lerOpcao("Insira opção: ");
+                if (encerrarAplicacao) {
+                    return;
+                }
                 String resultado = servicosJogo.processarEscolha(opcao);
+                mostrarNovasConquistas();
 
                 if (resultado == null) {
                     System.out.println("Escolha inválida ou requisitos não atendidos.");
@@ -365,18 +429,29 @@ public class ViewTerminal {
                 if (resultado.equals("Sair")) {
                     jogando = false;
                     executando = false;
-                    Saida();
+                    encerrarAplicacao();
                 }
                 else if (resultado.equals("Pausar")) {
-                    pausar();
-                    limparTela();
-                    System.out.print(servicosJogo.cenaToString());
+                    if (pausar()) {
+                        limparTela();
+                        System.out.print(servicosJogo.cenaToString());
+                    } else {
+                        jogando = false;
+                        executando = false;
+                        if (!encerrarAplicacao) {
+                            System.out.println("Partida encerrada. Voltando ao menu principal.");
+                        }
+                    }
 
                 } else {
                     limparTela();
                     System.out.print(servicosJogo.textoTransicao(opcao));
                     aguardarEnter();
+                    if (encerrarAplicacao) {
+                        return;
+                    }
                     servicosJogo.changeCena(resultado);
+                    mostrarNovasConquistas();
                     executando = false;
                 }
             }
@@ -388,7 +463,14 @@ public class ViewTerminal {
         System.out.println("Antes de entrar na Mansão Ashcroft, antes de Greyhaven, antes de Blackglass mudar tudo... você tinha um nome.\n" +
                 "Qual é o nome que carrega sua historia?");
 
-        String nome = scanner.nextLine();
+        String nome;
+        try {
+            nome = scanner.nextLine();
+        } catch (java.util.NoSuchElementException e) {
+            System.out.println("\nEntrada encerrada. Fechando o jogo.");
+            encerrarAplicacao = true;
+            return;
+        }
         if (nome == null || nome.isBlank()) {
             nome = "Aventureiro";
         }
@@ -405,22 +487,21 @@ public class ViewTerminal {
         jogando();
     }
 
-    public void continuarPartida() throws Exception {
+    public boolean continuarPartida() throws Exception {
         int save = servicosJogo.continuarPartida();
 
         if(save != -1){
             servicosJogo.carregarPartida(save);
             jogando();
+            return true;
         }else{
             System.out.print("Crie um novo jogo antes de continuar partida!");
+            return false;
         }
     }
 
     public void menuPreferencias() throws Exception {
-
-        boolean executando = true;
-
-        while (executando) {
+        while (!encerrarAplicacao) {
 
             List<PreferenciaDTO> preferencias =
                     servicosJogo.getInfoPreferencias();
@@ -450,19 +531,13 @@ public class ViewTerminal {
             System.out.println("────────────────────────────────────────");
             System.out.println("[0] Voltar");
             System.out.println("────────────────────────────────────────");
-            System.out.print("Deseja alterar alguma opção? Qual? ");
-
-            int opcao;
-
-            try {
-                opcao = Integer.parseInt(scanner.nextLine());
-            } catch (NumberFormatException e) {
-                System.out.println("Opção inválida!");
-                continue;
+            int opcao = lerOpcao("Deseja alterar alguma opção? Qual? ");
+            if (encerrarAplicacao) {
+                return;
             }
 
             if (opcao == 0) {
-                executando = false;
+                return;
 
             } else if (opcao >= 1 && opcao <= preferencias.size()) {
                servicosJogo.alterarPreferencia(opcao - 1);
@@ -470,6 +545,13 @@ public class ViewTerminal {
             } else {
                 System.out.println("Opção inválida!");
             }
+        }
+    }
+
+    private void encerrarAplicacao() {
+        if (!encerrarAplicacao) {
+            encerrarAplicacao = true;
+            Saida();
         }
     }
 

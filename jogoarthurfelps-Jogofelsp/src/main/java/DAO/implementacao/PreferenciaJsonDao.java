@@ -18,9 +18,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class PreferenciaJsonDao implements preferenciaDAO {
-    private final Path arquivo = Path.of("jogoarthurfelps-Jogofelsp","saves","preferencia.json");
+    private final Path arquivo;
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
+    public PreferenciaJsonDao() {
+        this(Path.of("jogoarthurfelps-Jogofelsp", "saves", "preferencia.json"));
+    }
+
+    public PreferenciaJsonDao(Path arquivo) {
+        this.arquivo = arquivo;
+    }
 
     @Override
     public Preferencia getPreferencia(int id) throws Exception {

@@ -1,16 +1,22 @@
 package Model;
 
 public class Conquista {
+    private String id;
     private String nome;
     private String descricao;
     private String criterio;
     private boolean desbloqueada;
 
-    public Conquista(String nome, String descricao, String criterio) {
+    public Conquista(String id, String nome, String descricao, String criterio, boolean desbloqueada) {
+        this.id = id;
         this.nome = nome;
         this.descricao = descricao;
         this.criterio = criterio;
-        this.desbloqueada = false;
+        this.desbloqueada = desbloqueada;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public String getNome() {

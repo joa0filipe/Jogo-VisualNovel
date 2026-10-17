@@ -1,8 +1,11 @@
 package View;
 
+import java.io.IOException;
 import java.time.format.DateTimeFormatter;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 import Controller.ServicosJogo;
+import DTOs.ConquistaDTO;
 import DTOs.EstadoJogoDTO;
 
 public class ViewTerminal {
@@ -33,7 +36,7 @@ public class ViewTerminal {
                 return Integer.parseInt(entrada.trim());
             } catch (NumberFormatException e) {
                 System.out.println("Entrada inválida. Use apenas números.");
-            } catch (java.util.NoSuchElementException e) {
+            } catch (NoSuchElementException e) {
                 System.out.println("\nEntrada encerrada. Encerrando o jogo.");
                 System.exit(0);
                 return -1;
@@ -46,7 +49,7 @@ public class ViewTerminal {
 
         try {
             scanner.nextLine();
-        } catch (java.util.NoSuchElementException e) {
+        } catch (NoSuchElementException e) {
             System.out.println();
         }
     }
@@ -88,7 +91,9 @@ public class ViewTerminal {
                 ║                                                    ║
                 ║                    [3] CRÉDITOS                    ║
                 ║                                                    ║
-                ║                    [4] SAIR                        ║
+                ║                    [4] CONQUISTAS                  ║
+                ║                                                    ║
+                ║                    [5] SAIR                        ║
                 """);
 
             int opcao = lerOpcao("\n> Opção: ");
@@ -102,6 +107,10 @@ public class ViewTerminal {
                 case 3 -> mostrarCreditos();
 
                 case 4 -> {
+                    mostrarConquistas();
+                }
+
+                case 5 -> {
                     Saida();
                     noMenu = false;
                 }
@@ -166,6 +175,41 @@ public class ViewTerminal {
             """);
 
         aguardarEnter();
+    }
+
+    public void mostrarConquistas() throws IOException {
+        limparTela();
+        System.out.println("""
+                ╔══════════════════════════════════════════════════════════════╗
+                ║                     GALERIA DE CONQUISTAS                    ║
+                ╚══════════════════════════════════════════════════════════════╝
+                """);
+
+        var conquistas = servicosJogo.getConquistasDesbloqueadas();
+        if (conquistas.isEmpty()) {
+            System.out.println("Nenhuma conquista desbloqueada ainda.");
+        } else {
+            for (ConquistaDTO conquista : conquistas) {
+                System.out.printf("%n🏆 %s%n   %s%n", conquista.nome(), conquista.descricao());
+            }
+        }
+
+        var finais = servicosJogo.getGaleriaFinais();
+        long finaisAlcancados = finais.stream().filter(ConquistaDTO::desbloqueada).count();
+        System.out.printf("%nFINAIS ALCANÇADOS: %d/%d%n", finaisAlcancados, finais.size());
+        for (ConquistaDTO finalJogo : finais) {
+            String estado = finalJogo.desbloqueada() ? "ALCANÇADO" : "NÃO ALCANÇADO";
+            System.out.printf("%n[%s] %s%n   %s%n",
+                    estado, finalJogo.nome(), finalJogo.descricao());
+        }
+        aguardarEnter();
+    }
+
+    private void mostrarNovasConquistas() {
+        for (ConquistaDTO conquista : servicosJogo.consumirConquistasRecentes()) {
+            System.out.printf("%n🏆 Conquista desbloqueada: %s — %s%n",
+                    conquista.nome(), conquista.descricao());
+        }
     }
 
     public void mostrarInstrucoes() {
@@ -351,6 +395,7 @@ public class ViewTerminal {
             while (executando) {
                 int opcao = lerOpcao("Insira opção: ");
                 String resultado = servicosJogo.processarEscolha(opcao);
+                mostrarNovasConquistas();
 
                 if (resultado == null) {
                     System.out.println("Escolha inválida ou requisitos não atendidos.");
@@ -373,6 +418,7 @@ public class ViewTerminal {
                     System.out.print(servicosJogo.textoTransicao(opcao));
                     aguardarEnter();
                     servicosJogo.changeCena(resultado);
+                    mostrarNovasConquistas();
                     executando = false;
                 }
             }
@@ -384,7 +430,13 @@ public class ViewTerminal {
         System.out.println("Antes de entrar na Mansão Ashcroft, antes de Greyhaven, antes de Blackglass mudar tudo... você tinha um nome.\n" +
                 "Qual é o nome que carrega sua historia?");
 
-        String nome = scanner.nextLine();
+        String nome;
+        try {
+            nome = scanner.nextLine();
+        } catch (NoSuchElementException e) {
+            System.out.println("\nEntrada encerrada. Não foi possível iniciar uma nova partida.");
+            return;
+        }
         if (nome == null || nome.isBlank()) {
             nome = "Aventureiro";
         }

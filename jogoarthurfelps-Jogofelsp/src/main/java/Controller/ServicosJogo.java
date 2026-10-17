@@ -13,6 +13,8 @@ import Repository.RepositorioDePersonagens;
 import DAO.implementacao.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class ServicosJogo {
@@ -26,10 +28,17 @@ public class ServicosJogo {
     private final EstadoJsonDao estadoDao;
     private JogoRepository staterepository;
     private final ServicosSave servicosSave;
+    private final ServicosConquistas servicosConquistas;
+    private List<DTOs.ConquistaDTO> conquistasRecentes = List.of();
     private int slot;
 
 
     public ServicosJogo(RepositorioDeCenas repository, RepositorioDeItens repositorioDeItens, RepositorioDePersonagens repositorioDePersonagens, JogoRepository stateRepository, EstadoJsonDao estadoDao, ServicosSave servicosSave) {
+        this(repository, repositorioDeItens, repositorioDePersonagens, stateRepository, estadoDao,
+                servicosSave, new ServicosConquistas(new ConquistasJsonDao()));
+    }
+
+    public ServicosJogo(RepositorioDeCenas repository, RepositorioDeItens repositorioDeItens, RepositorioDePersonagens repositorioDePersonagens, JogoRepository stateRepository, EstadoJsonDao estadoDao, ServicosSave servicosSave, ServicosConquistas servicosConquistas) {
         this.repositorio = repository;
         this.repositorioDeItens = repositorioDeItens;
         this.servicosSave = servicosSave;
@@ -37,6 +46,7 @@ public class ServicosJogo {
         this.repositorioDePersonagens = repositorioDePersonagens;
         this.staterepository = stateRepository;
         this.estadoDao = estadoDao;
+        this.servicosConquistas = servicosConquistas;
     }
 
     public void iniciarNovaPartida(String nomeJogador, int save) throws Exception {
@@ -156,7 +166,7 @@ public class ServicosJogo {
         return texto;
     }
 
-    public String processarEscolha(int index){
+    public String processarEscolha(int index) throws IOException {
         if(index == 6){
             return "Sair";
         }
@@ -171,6 +181,7 @@ public class ServicosJogo {
 
              if (cenaAtual.getEscolha(index - 1).podeExecutarEscolha(prota)) {
                 cenaAtual.getEscolha(index -1).aplicarEfeitos(prota);
+                 conquistasRecentes = servicosConquistas.registrarEvento("ESCOLHA_REALIZADA");
                  }
                 else {
                     return null;
@@ -196,6 +207,29 @@ public class ServicosJogo {
             saveManual();
         }
         this.cenaAtual = repositorio.getCena(nextCena);
+        if (this.cenaAtual != null) {
+            List<DTOs.ConquistaDTO> novasConquistas = new ArrayList<>(
+                    servicosConquistas.registrarEvento("CENA:" + this.cenaAtual.getId()));
+            if (this.cenaAtual.isFinal()) {
+                novasConquistas.addAll(servicosConquistas.registrarEvento(
+                        "FINAL:" + this.cenaAtual.getId()));
+            }
+            conquistasRecentes = List.copyOf(novasConquistas);
+        }
+    }
+
+    public List<DTOs.ConquistaDTO> getConquistasDesbloqueadas() throws IOException {
+        return servicosConquistas.getConquistasDesbloqueadas();
+    }
+
+    public List<DTOs.ConquistaDTO> getGaleriaFinais() throws IOException {
+        return servicosConquistas.getGaleriaFinais();
+    }
+
+    public List<DTOs.ConquistaDTO> consumirConquistasRecentes() {
+        List<DTOs.ConquistaDTO> recentes = conquistasRecentes;
+        conquistasRecentes = List.of();
+        return recentes;
     }
 
     public void saveManual() throws Exception {

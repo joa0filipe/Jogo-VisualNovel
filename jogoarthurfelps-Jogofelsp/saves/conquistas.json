@@ -1,0 +1,44 @@
+[
+  {
+    "id": "primeira_escolha",
+    "nome": "Primeiros passos",
+    "descricao": "Faça sua primeira escolha na história.",
+    "criterio": "ESCOLHA_REALIZADA",
+    "desbloqueada": false
+  },
+  {
+    "id": "coracao_da_mansao",
+    "nome": "O coração da mansão",
+    "descricao": "Chegue à sala de Blackglass.",
+    "criterio": "CENA:C02_001",
+    "desbloqueada": false
+  },
+  {
+    "id": "final_preco_certo",
+    "nome": "O preço certo",
+    "descricao": "Conclua a história escolhendo o final O Preço Certo.",
+    "criterio": "FINAL:C10_DINHEIRO",
+    "desbloqueada": false
+  },
+  {
+    "id": "final_parceiros",
+    "nome": "Parceiros até o fim",
+    "descricao": "Conclua a história no final Parceiros.",
+    "criterio": "FINAL:C10_PARCEIROS",
+    "desbloqueada": false
+  },
+  {
+    "id": "final_blackglass",
+    "nome": "Tudo para si",
+    "descricao": "Conclua a história no final Tudo Para Si.",
+    "criterio": "FINAL:C10_BLACKGLASS",
+    "desbloqueada": false
+  },
+  {
+    "id": "final_quebrando_vidro",
+    "nome": "Quebrando o vidro",
+    "descricao": "Descubra e conclua o final secreto.",
+    "criterio": "FINAL:C10_SEGREDO",
+    "desbloqueada": false
+  }
+]

@@ -1,4 +1,5 @@
 import Controller.ServicosJogo;
+import Controller.ServicosConquistas;
 import Controller.ServicosSave;
 import Loader.LoaderDeItens;
 import Loader.LoaderDePersonagens;
@@ -8,8 +9,7 @@ import Repository.RepositorioDeItens;
 import Repository.RepositorioDePersonagens;
 import View.ViewTerminal;
 import DAO.implementacao.*;
-public class
-Main {
+public class Main {
   public static void main(String[] args) throws Exception {
 
     JogoRepository stateRepository = new JogoRepository(); //tirar
@@ -21,6 +21,8 @@ Main {
     //dao
     EstadoJsonDao EstadoDao = new EstadoJsonDao();
     PreferenciaJsonDao PreferenciaDao = new PreferenciaJsonDao();
+    ConquistasJsonDao conquistasDao = new ConquistasJsonDao();
+    ServicosConquistas servicosConquistas = new ServicosConquistas(conquistasDao);
 
     loaderPersonagens.carregarPersonagens();
 
@@ -36,7 +38,8 @@ Main {
             repositorioPersonagens,
             stateRepository,
             EstadoDao,
-            servicosSave
+            servicosSave,
+            servicosConquistas
     );
 
     ViewTerminal view = new ViewTerminal(servicosJogo);
